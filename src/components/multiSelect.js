@@ -3,7 +3,7 @@ import MultiSelect from '@khanacademy/react-multi-select';
 
 const options =[
     {label: "Proxy Id", value: 'Proxy Id'},
-    {label: "Plan  Design", value: 'Plan Design'},
+    {label: "Plan Design", value: 'Plan Design'},
     {label: "Plan Name", value: 'Plan Name'},
 
 ];
@@ -11,27 +11,77 @@ const options =[
 class Option2 extends React.Component{
     state= {
         selected :[],
-        rows :[{
-            name:"",
-            IncExc:"inc",
-            drp:""
-        }]
+        rows :[]
     }
 
-    getValue =(val,idx)=>{
-        return true
-    }
 
-    handleChange =() =>{
+    handleChange = idx => e =>{
+        const {name,value} = e.target
+        const rows =[...this.state.selected]
+        const newR=[...this.state.rows]
+        newR[idx]['drp']=rows[idx];
+        newR[idx][name]=value
+        this.setState({rows:newR})
 
     }
 
     handleRemoveRows =(idx)=>{
+
         const selected =[...this.state.selected]
         selected.splice(idx,1)
         this.setState({selected})
     }
 
+    onSelectedValueEvent = selected =>{
+        const len = selected.length;
+        const {rows} = this.state
+        const newEmp= new Array(len)
+        const newR={
+            incValue="",
+            excValue="",
+            drp=""
+        }
+        newEmp.fill(newR,0)
+        const newRows=[...rows,...newEmp]
+
+        this.setState({
+            selected,
+            rows:newRows
+        })
+    }
+
+getIncDetails(){
+    const rows = this.state.rows
+    if(rows[idx].IncExc=="inc"){
+        return (<input type="text"
+        name="incValue"placeholder="Inc Value"
+        value={rows[idx].incValue}
+        onChange={this.handleChange(idx)}
+        className="form-control" />)
+    }
+    if(rows[idx].IncExc=="exc"){
+        return (<input type="text"
+        name="excValue"placeholder="Exc Value"
+        value={rows[idx].excValue}
+        onChange={this.handleChange(idx)}
+        className="form-control" />)
+    }
+    if(rows[idx].IncExc=="both"){
+        return (<div>
+            <input type="text"
+        name="incValue"placeholder="Inc Value"
+        value={rows[idx].incValue}
+        onChange={this.handleChange(idx)}
+        className="form-control" />
+        <br/>
+        <input type="text"
+        name="excValue"placeholder="Exc Value"
+        value={rows[idx].excValue}
+        onChange={this.handleChange(idx)}
+        className="form-control" />
+            </div>)
+    }
+}
     render(){
         const { selected } = this.state;
         return (
@@ -43,7 +93,7 @@ class Option2 extends React.Component{
                         <MultiSelect
                         options={options}
                         selected={selected}
-                        onSelectedChange={selected => this.setState({selected})}/>
+                        onSelectedChanged={this.onSelectedValueEvent}/>
                     </div>
                 </div>
                 <div>
@@ -67,32 +117,21 @@ class Option2 extends React.Component{
                                                 <form>
                                                     <input type="radio" name="IncExc"
                                                     value={"inc"}
-                                                    checked={this.getValue("inc",idx)} onChange={this.handleChange(idx)}  />
+                                                     onChange={this.handleChange(idx)} checked={this.state.rows[idx].IncExc="inc"} /> Inc&nbsp;&nbsp;
                                                     /
                                                     <input type="radio" name="IncExc"
                                                     value={"exc"}
-                                                    checked={this.getValue("exc",idx)} onChange={this.handleChange(idx)}  />
+                                                     onChange={this.handleChange(idx)} checked={this.state.rows[idx].IncExc="exc"} /> Exc&nbsp;&nbsp;
+                                                        <input type="radio" name="IncExc"
+                                                    value={"both"}
+                                                     onChange={this.handleChange(idx)}  checked={this.state.rows[idx].IncExc="both"} /> Both
                                                              </form>
                                             </td>
                                             <td>
                                             {this.state.selected[idx]}
                                             </td>
                                             <td>
-                                                {this.state.selected[idx]=="Plan Design" ? (
-                                                    <select id="dropdown" name="subdrp">
-                                                        <option value="N/A">Select</option>
-                                                        <option value="N/A">Adult Embedded</option>
-                                                        <option value="N/A">Alternate</option>
-                                                        <option value="N/A">Adult Standalone</option>
-                                                        <option value="N/A">Anthem Lumenos</option>
-                                                    </select>
-                                                ) : (
-                                                    <input
-                                                    type="text"
-                                                    name="name"
-                                                    value={this.state.selected[idx].name}
-                                                    className="form-control" />
-                                                ) }
+                                               {this.getIncDetails()}
                                             </td>
                                             <td>
                                                 <button className="btn btn-outline-danger btn-sm" onClick={this.handleRemoveRows(idx)}>Remove</button>
